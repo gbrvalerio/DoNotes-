@@ -1,15 +1,8 @@
 package br.com.gabrielvalerio.DoNotes.core;
 
-import java.awt.AWTException;
-import java.awt.MenuItem;
-import java.awt.PopupMenu;
-import java.awt.SystemTray;
-import java.awt.TrayIcon;
-import br.com.gabrielvalerio.DoNotes.resources.Resources;
+import java.util.concurrent.ExecutionException;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
 
@@ -32,18 +25,16 @@ public class Main extends Application{
 	 * @param message A mensagem do alerta
 	 * @param title O titulo do alerta
 	 * @param type O tipo de alerta (Constantes da enum AlertType)
-	 * @return Caso o tipo de alerta selecionado seja de confirmação esse metodo retorna o objeto ButtonType OK ou CANCEL ou null se não for um alerta de confirmação
+	 * @return true se o tipo de alerta for de confirmação e o usuario pressionar OK; false nos demais casos.
 	 */
-	public static ButtonType displayAlert(String message, String title, AlertType type){
-		Alert alert = new Alert(type);
-		
-		alert.setTitle(title);
-		alert.setContentText(message);
-		
-		if(alert.getAlertType() == AlertType.CONFIRMATION)
-			return alert.showAndWait().get();
-		else
-			alert.show();
-		return null;
+	public static boolean displayAlert(String message, String title, AlertType type) {
+		AlertTask task = new AlertTask(title, message, type);
+		Platform.runLater(task);
+		try {
+			return task.get().booleanValue();
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 }
