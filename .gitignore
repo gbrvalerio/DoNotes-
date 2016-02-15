@@ -1,5 +1,5 @@
 ./src/test/*
 .settings
-./target/*
+target/*
 .classpath
 .project
