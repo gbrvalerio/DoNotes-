@@ -1,6 +1,7 @@
 package br.com.gabrielvalerio.DoNotes.core;
 
 import java.awt.AWTException;
+import java.awt.Image;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
@@ -11,14 +12,12 @@ import javafx.scene.control.Alert.AlertType;
 
 public class MainSystemTray {
 	
+	
 	private SystemTray sysTray;
 	private TrayIcon trayIcon;
 	
 	public MainSystemTray() {
-		if(!SystemTray.isSupported()){
-			Main.displayAlert("Seu sistema não possui as funcionalidades requeridas pelo programa. Saindo...", "Erro", AlertType.ERROR);
-			System.exit(-1);
-		}
+		checkIfSysTrayIsSupported();
 		
 		sysTray = SystemTray.getSystemTray();
 		trayIcon = new TrayIcon(Resources.ICONE);
@@ -29,12 +28,8 @@ public class MainSystemTray {
 		MenuItem menuI_exit		= new MenuItem("Sair");
 		
 		menuI_exit.addActionListener((event) -> {
-				try {
-					if(Main.displayAlert("Tem certeza que deseja sair?", "Confirmação", AlertType.CONFIRMATION))
-						System.exit(0);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			if(Main.displayAlert("Tem certeza que deseja sair?", "Confirmação", AlertType.CONFIRMATION))
+				System.exit(0);
 		});
 		
 		
@@ -49,5 +44,20 @@ public class MainSystemTray {
 		} catch (AWTException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private void checkIfSysTrayIsSupported() {
+		if(!SystemTray.isSupported()){
+			Main.displayAlert("Seu sistema não possui as funcionalidades requeridas pelo programa. Saindo...", "Erro", AlertType.ERROR);
+			System.exit(-1);
+		}
+	}
+
+	public void displayNotification(String title, String message, TrayIcon.MessageType type){
+		trayIcon.displayMessage(title, message, type);
+	}
+	
+	public void setIcon(Image icon){
+		trayIcon.setImage(icon);
 	}
 }
