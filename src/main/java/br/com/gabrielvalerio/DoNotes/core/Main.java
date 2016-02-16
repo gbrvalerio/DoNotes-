@@ -15,12 +15,16 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Control;
+import javafx.scene.control.Skin;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
@@ -32,7 +36,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
+import javafx.scene.text.Font;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -58,11 +64,15 @@ public class Main extends Application{
 		
 		
 		
-		TextArea txtArea = new TextArea();
+		TextArea textArea = new TextArea();
+		textArea.setFont(new Font("Verdana", 12));
+		
+		borderPane.setCenter(textArea);
 
-		borderPane.setTop(startHbox());
+		borderPane.setTop(startTopBar());
 		
 		Scene scene = new Scene(borderPane);
+		scene.getStylesheets().add(Resources.TRANSPTXTAREA);
 		
 		primaryStage.setOnCloseRequest(e -> {
 			e.consume();
@@ -78,7 +88,7 @@ public class Main extends Application{
 		initialized = true;
 	}
 	
-	private HBox startHbox(){
+	private HBox startTopBar(){
 		HBox topBox = new HBox();
 		//topBox.setStyle("-fx-background-color: rgb(0,0,0,0.0);");
 		

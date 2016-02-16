@@ -12,7 +12,8 @@ public final class Resources {
 	public static final javafx.scene.image.Image 	MOVEIMAGE	= new javafx.scene.image.Image(Resources.class.getResource("move.png").toExternalForm());
 	public static final javafx.scene.image.Image 	CLOSEIMAGE	= new javafx.scene.image.Image(Resources.class.getResource("close.png").toExternalForm());
 	
-	public static final String 		BG_LINK		= linkStart + "background.png";
-	public static final int			BG_WIDTH	= 547;
-	public static final int			BG_HEIGHT	= 547;
+	public static final String		TRANSPTXTAREA	= linkStart + "transparenttextarea.css";
+	public static final String 		BG_LINK			= linkStart + "background.png";
+	public static final int			BG_WIDTH		= 547;
+	public static final int			BG_HEIGHT		= 547;
 }
