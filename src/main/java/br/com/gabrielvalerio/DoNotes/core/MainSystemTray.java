@@ -13,8 +13,10 @@ import javafx.scene.control.Alert.AlertType;
 public class MainSystemTray {
 	
 	
-	private SystemTray sysTray;
-	private TrayIcon trayIcon;
+	private SystemTray 			sysTray;
+	private TrayIcon 			trayIcon;
+	private static boolean 		initialized;
+	
 	
 	public MainSystemTray() {
 		checkIfSysTrayIsSupported();
@@ -32,7 +34,9 @@ public class MainSystemTray {
 				System.exit(0);
 		});
 		
-		
+		menuI_newNote.addActionListener((event) -> {
+			Main.openNote();
+		});
 		
 		popup.add(menuI_newNote);
 		popup.addSeparator();
@@ -44,6 +48,10 @@ public class MainSystemTray {
 		} catch (AWTException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static boolean isInitialized() {
+		return initialized;
 	}
 	
 	private void checkIfSysTrayIsSupported() {

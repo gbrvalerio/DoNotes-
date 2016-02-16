@@ -4,6 +4,7 @@ import java.awt.Paint;
 import java.awt.PaintContext;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.TrayIcon.MessageType;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.ColorModel;
@@ -38,8 +39,10 @@ import javafx.stage.StageStyle;
 
 public class Main extends Application{
 	
-	private MainSystemTray 	mainSysTray;
-	private Stage			mainStage;
+	private static MainSystemTray 	mainSysTray;
+	private static Stage			mainStage;
+	private static boolean			initialized = false;
+	
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -49,6 +52,7 @@ public class Main extends Application{
 		//inicializa o systray
 		mainSysTray = new MainSystemTray();
 		
+		//inicializa o border pane e seta o background
 		BorderPane borderPane = new BorderPane();
 		borderPane.setStyle("-fx-background-image: url('"+Resources.BG_LINK+"');");
 		
@@ -70,7 +74,8 @@ public class Main extends Application{
 		mainStage.setWidth(Resources.BG_WIDTH);
 		mainStage.setHeight(Resources.BG_HEIGHT);
 		mainStage.setResizable(false);
-		mainStage.show();
+		
+		initialized = true;
 	}
 	
 	private HBox startHbox(){
@@ -102,6 +107,19 @@ public class Main extends Application{
 		topBox.setHgrow(rightTopBox, Priority.ALWAYS);
 		
 		return topBox;
+	}
+	
+	
+	public static boolean isInitialized() {
+		return initialized;
+	}
+	
+	public static void openNote(){
+		if(!isInitialized()){
+			mainSysTray.displayNotification("Ainda não inicializado!", "Aguarde só mais um instantinho...", MessageType.INFO);
+			return;
+		}
+		Platform.runLater(() -> mainStage.show());
 	}
 	
 	public static void main(String[] args) {
