@@ -1,0 +1,3 @@
+.list-cell, .list-cell .clipped-container {
+    -fx-background-color: transparent;
+}

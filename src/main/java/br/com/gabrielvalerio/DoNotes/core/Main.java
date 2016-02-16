@@ -3,12 +3,14 @@ package br.com.gabrielvalerio.DoNotes.core;
 import java.awt.TrayIcon.MessageType;
 import java.util.concurrent.ExecutionException;
 import br.com.gabrielvalerio.DoNotes.resources.Resources;
+import br.com.gabrielvalerio.DoNotes.util.NoteFinder;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
@@ -21,39 +23,71 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 public class Main extends Application{
-	
+	//main variables
 	private static MainSystemTray 	mainSysTray;
 	private static Stage			mainStage;
 	private static boolean			initialized = false;
 	
+	private Scene 				scene;
+	private HBox 				root;
+	private BorderPane 			borderPane;
+	private ImageView 			sidebar;
+	private TextArea 			textArea;
+	private HBox 				topBox;
+	private StackPane 			leftTopBox;
+	private StackPane 			rightTopBox;
+	private ImageView 			moveImage;
+	private ImageView			closeImage;
+	private ListView<String>	noteList;
+	
+	private boolean				sidebarOpen;
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
+		root 			= new HBox();
+		borderPane 		= new BorderPane();
+		sidebar 		= new ImageView();
+		textArea 		= new TextArea();
+		noteList		= NoteFinder.getNotesList();
+		
 		mainStage = primaryStage;
-		//evita a thread do fx de fechar caso nao tenha nenhuma janela ainda
-		Platform.setImplicitExit(false);
-		//inicializa o systray
 		mainSysTray = new MainSystemTray();
 		
+		//evita a thread do fx de fechar caso nao tenha nenhuma janela ainda
+		Platform.setImplicitExit(false);
 		
-		
-		//inicializa o border pane e seta o background
-		BorderPane borderPane = new BorderPane();
+		//seta o background
 		borderPane.setStyle("-fx-background-image: url('"+Resources.BG_LINK+"');");
 		
-		ImageView sidebar = new ImageView();
 		sidebar.setImage(Resources.SIDEBARCLOSED);
+		
+		StackPane noteListPane = new StackPane();
+		noteListPane.setAlignment(Pos.CENTER_RIGHT);
+		noteListPane.getChildren().add(noteList);
+		noteListPane.setMaxWidth(100);
+		HBox.setHgrow(noteListPane, Priority.ALWAYS);
+		
+		noteList.setMaxWidth(100);
+		noteList.setMinHeight(Resources.BG_HEIGHT);
+		noteList.setStyle("-fx-background-image: url('"+Resources.LISTBG_LINK+"');");
+		
+		//ações de abrir/fechar a sidebar
 		sidebar.setOnMouseClicked((event) ->{
 			if(event.getButton() == MouseButton.PRIMARY){
-				if(sidebar.getImage() == Resources.SIDEBARCLOSED)
+				if(!isSidebarOpen()){
 					sidebar.setImage(Resources.SIDEBAROPEN);
-				else
+					mainStage.setWidth(mainStage.getWidth() + 100);
+					setSidebarOpen(true);
+					root.getChildren().add(noteListPane);
+				} else{
 					sidebar.setImage(Resources.SIDEBARCLOSED);
+					root.getChildren().remove(noteListPane);
+					mainStage.setWidth(mainStage.getWidth() - 100);
+					setSidebarOpen(false);
+				}
 			}	
 		});
 		
-		
-		TextArea textArea = new TextArea();
 		textArea.setFont(Resources.FONT);
 		//tira o scroll pro lado
 		textArea.setWrapText(true);
@@ -62,15 +96,15 @@ public class Main extends Application{
 		borderPane.setTop(startTopBar());
 		borderPane.setMinHeight(Resources.BG_WIDTH);
 		
-		HBox root = new HBox();
+		
 		root.getChildren().addAll(borderPane, sidebar);
 		root.setMaxWidth(Resources.BG_WIDTH + Resources.SIDEBARWIDTH);
 		root.setPadding(new Insets(0));
 		HBox.setHgrow(borderPane, Priority.ALWAYS);
 		
 		
-		Scene scene = new Scene(root);
-		scene.getStylesheets().add(Resources.TRANSPTXTAREA);
+		scene = new Scene(root);
+		scene.getStylesheets().addAll(Resources.TRANSPTXTAREA, Resources.TRANSPLSTVIEW);
 		
 		primaryStage.setOnCloseRequest(e -> {
 			e.consume();
@@ -84,19 +118,26 @@ public class Main extends Application{
 		mainStage.setResizable(false);
 		
 		initialized = true;
+		mainSysTray.displayNotification("Pronto!", "Para adicionar uma nova nota clique no item com o botão direito!", MessageType.INFO);
+	}
+	
+	public void setSidebarOpen(boolean sidebarOpen) {
+		this.sidebarOpen = sidebarOpen;
+	}
+	
+	public boolean isSidebarOpen() {
+		return sidebarOpen;
 	}
 	
 	private HBox startTopBar(){
-		HBox topBox = new HBox();
+		topBox = new HBox();
 		//topBox.setStyle("-fx-background-color: rgb(0,0,0,0.0);");
 		
-		StackPane leftTopBox = new StackPane();
-		StackPane rightTopBox = new StackPane();
+		leftTopBox = new StackPane();
+		rightTopBox = new StackPane();
 		
-		rightTopBox.setPadding(new Insets(0, Resources.SIDEBARWIDTH+4, 0, 0));
-		
-		ImageView moveImage = new ImageView(Resources.MOVEIMAGE);
-		ImageView closeImage = new ImageView(Resources.CLOSEIMAGE);
+		moveImage = new ImageView(Resources.MOVEIMAGE);
+		closeImage = new ImageView(Resources.CLOSEIMAGE);
 		
 		closeImage.setOnMouseClicked((event) ->{
 			mainStage.close();
