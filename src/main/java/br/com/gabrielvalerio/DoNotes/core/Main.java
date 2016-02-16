@@ -1,45 +1,22 @@
 package br.com.gabrielvalerio.DoNotes.core;
 
-import java.awt.Paint;
-import java.awt.PaintContext;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.TrayIcon.MessageType;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.ColorModel;
 import java.util.concurrent.ExecutionException;
-
 import br.com.gabrielvalerio.DoNotes.resources.Resources;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Control;
-import javafx.scene.control.Skin;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.BackgroundImage;
-import javafx.scene.layout.BackgroundPosition;
-import javafx.scene.layout.BackgroundSize;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
-import javafx.scene.text.Font;
-import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
@@ -58,20 +35,41 @@ public class Main extends Application{
 		//inicializa o systray
 		mainSysTray = new MainSystemTray();
 		
+		
+		
 		//inicializa o border pane e seta o background
 		BorderPane borderPane = new BorderPane();
 		borderPane.setStyle("-fx-background-image: url('"+Resources.BG_LINK+"');");
 		
+		ImageView sidebar = new ImageView();
+		sidebar.setImage(Resources.SIDEBARCLOSED);
+		sidebar.setOnMouseClicked((event) ->{
+			if(event.getButton() == MouseButton.PRIMARY){
+				if(sidebar.getImage() == Resources.SIDEBARCLOSED)
+					sidebar.setImage(Resources.SIDEBAROPEN);
+				else
+					sidebar.setImage(Resources.SIDEBARCLOSED);
+			}	
+		});
 		
 		
 		TextArea textArea = new TextArea();
-		textArea.setFont(new Font("Verdana", 12));
+		textArea.setFont(Resources.FONT);
+		//tira o scroll pro lado
+		textArea.setWrapText(true);
 		
 		borderPane.setCenter(textArea);
-
 		borderPane.setTop(startTopBar());
+		borderPane.setMinHeight(Resources.BG_WIDTH);
 		
-		Scene scene = new Scene(borderPane);
+		HBox root = new HBox();
+		root.getChildren().addAll(borderPane, sidebar);
+		root.setMaxWidth(Resources.BG_WIDTH + Resources.SIDEBARWIDTH);
+		root.setPadding(new Insets(0));
+		HBox.setHgrow(borderPane, Priority.ALWAYS);
+		
+		
+		Scene scene = new Scene(root);
 		scene.getStylesheets().add(Resources.TRANSPTXTAREA);
 		
 		primaryStage.setOnCloseRequest(e -> {
@@ -81,7 +79,7 @@ public class Main extends Application{
 		
 		mainStage.initStyle(StageStyle.UNDECORATED);
 		mainStage.setScene(scene);
-		mainStage.setWidth(Resources.BG_WIDTH);
+		mainStage.setWidth(Resources.BG_WIDTH + Resources.SIDEBARWIDTH);
 		mainStage.setHeight(Resources.BG_HEIGHT);
 		mainStage.setResizable(false);
 		
@@ -94,6 +92,8 @@ public class Main extends Application{
 		
 		StackPane leftTopBox = new StackPane();
 		StackPane rightTopBox = new StackPane();
+		
+		rightTopBox.setPadding(new Insets(0, Resources.SIDEBARWIDTH+4, 0, 0));
 		
 		ImageView moveImage = new ImageView(Resources.MOVEIMAGE);
 		ImageView closeImage = new ImageView(Resources.CLOSEIMAGE);
@@ -119,11 +119,17 @@ public class Main extends Application{
 		return topBox;
 	}
 	
-	
+	/**
+	 * Verifica se o objeto já foi criado
+	 * @return true se já há uma instancia e false caso contrário
+	 */
 	public static boolean isInitialized() {
 		return initialized;
 	}
 	
+	/**
+	 * Chamar esse método abre a tela do stikynote.
+	 */
 	public static void openNote(){
 		if(!isInitialized()){
 			mainSysTray.displayNotification("Ainda não inicializado!", "Aguarde só mais um instantinho...", MessageType.INFO);
