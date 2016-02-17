@@ -15,7 +15,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
@@ -40,7 +39,42 @@ public class Main extends Application{
 	private ImageView			closeImage;
 	private ListView<String>	noteList;
 	
-	private boolean				sidebarOpen;
+	private boolean				smallSize = false;
+	private boolean				sidebarOpen = false;
+	
+	private void changeSize(){
+		if(isSmallSize()){
+			//setting big
+			borderPane.setStyle("-fx-background-image: url('"+Resources.BG_LINK+"');");
+			noteList.setStyle("-fx-background-image: url('"+Resources.LISTBG_LINK+"');");
+			sidebar.setImage((isSidebarOpen() ? Resources.SIDEBARCLOSED : Resources.SIDEBAROPEN));
+			noteList.setMinHeight(Resources.BG_HEIGHT);
+			borderPane.setMinHeight(Resources.BG_WIDTH);
+			root.setMaxWidth(Resources.BG_WIDTH + Resources.SIDEBARWIDTH);
+			mainStage.setWidth(Resources.BG_WIDTH + Resources.SIDEBARWIDTH);
+			mainStage.setHeight(Resources.BG_HEIGHT);
+			
+			noteList.autosize();
+			smallSize = false;
+		} else{
+			//setting small
+			borderPane.setStyle("-fx-background-image: url('"+Resources.SMALLBG_LINK+"');");
+			noteList.setStyle("-fx-background-image: url('"+Resources.SMALLLISTBG_LINK+"');");
+			sidebar.setImage((isSidebarOpen() ? Resources.SMALLSIDEBARCLOSED : Resources.SMALLSIDEBAROPEN));
+			noteList.setMinHeight(Resources.SMALLBG_HEIGHT);
+			borderPane.setMinHeight(Resources.SMALLBG_WIDTH);
+			root.setMaxWidth(Resources.SMALLBG_WIDTH + Resources.SIDEBARWIDTH);
+			mainStage.setWidth(Resources.SMALLBG_WIDTH + Resources.SIDEBARWIDTH);
+			mainStage.setHeight(Resources.SMALLBG_HEIGHT);
+			
+			noteList.autosize();
+			smallSize = true;
+		}
+	}
+	
+	public boolean isSmallSize() {
+		return smallSize;
+	}
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -64,10 +98,10 @@ public class Main extends Application{
 		StackPane noteListPane = new StackPane();
 		noteListPane.setAlignment(Pos.CENTER_RIGHT);
 		noteListPane.getChildren().add(noteList);
-		noteListPane.setMaxWidth(100);
+		noteListPane.setMaxWidth(Resources.NOTELISTWIDTH);
 		HBox.setHgrow(noteListPane, Priority.ALWAYS);
 		
-		noteList.setMaxWidth(100);
+		noteList.setMaxWidth(Resources.NOTELISTWIDTH);
 		noteList.setMinHeight(Resources.BG_HEIGHT);
 		noteList.setStyle("-fx-background-image: url('"+Resources.LISTBG_LINK+"');");
 		
@@ -75,14 +109,14 @@ public class Main extends Application{
 		sidebar.setOnMouseClicked((event) ->{
 			if(event.getButton() == MouseButton.PRIMARY){
 				if(!isSidebarOpen()){
-					sidebar.setImage(Resources.SIDEBAROPEN);
-					mainStage.setWidth(mainStage.getWidth() + 100);
+					sidebar.setImage((isSmallSize() ? Resources.SMALLSIDEBAROPEN :Resources.SIDEBAROPEN));
+					mainStage.setWidth(mainStage.getWidth() + Resources.NOTELISTWIDTH);
 					setSidebarOpen(true);
 					root.getChildren().add(noteListPane);
 				} else{
-					sidebar.setImage(Resources.SIDEBARCLOSED);
+					sidebar.setImage((isSmallSize() ? Resources.SMALLSIDEBARCLOSED :Resources.SIDEBARCLOSED));
 					root.getChildren().remove(noteListPane);
-					mainStage.setWidth(mainStage.getWidth() - 100);
+					mainStage.setWidth(mainStage.getWidth() - Resources.NOTELISTWIDTH);
 					setSidebarOpen(false);
 				}
 			}	
@@ -104,11 +138,11 @@ public class Main extends Application{
 		
 		
 		scene = new Scene(root);
-		scene.getStylesheets().addAll(Resources.TRANSPTXTAREA, Resources.TRANSPLSTVIEW);
+		scene.getStylesheets().addAll(Resources.CSSTXTAR_LINK, Resources.CSSTXTVW_LINK);
 		
 		primaryStage.setOnCloseRequest(e -> {
 			e.consume();
-			mainStage.close();
+			changeSize();
 		});
 		
 		mainStage.initStyle(StageStyle.UNDECORATED);
@@ -117,8 +151,10 @@ public class Main extends Application{
 		mainStage.setHeight(Resources.BG_HEIGHT);
 		mainStage.setResizable(false);
 		
+		
+		
 		initialized = true;
-		mainSysTray.displayNotification("Pronto!", "Para adicionar uma nova nota clique no item com o botão direito!", MessageType.INFO);
+		mainSysTray.displayNotification("Pronto!", "Para adicionar uma nova nota clique no ícone com o botão direito!", MessageType.INFO);
 	}
 	
 	public void setSidebarOpen(boolean sidebarOpen) {
@@ -140,7 +176,8 @@ public class Main extends Application{
 		closeImage = new ImageView(Resources.CLOSEIMAGE);
 		
 		closeImage.setOnMouseClicked((event) ->{
-			mainStage.close();
+			//mainStage.close();
+			changeSize();
 		});
 		
 		moveImage.setOnMouseDragged((event) ->{
@@ -155,7 +192,7 @@ public class Main extends Application{
 		rightTopBox.getChildren().add(closeImage);
 		rightTopBox.setAlignment(Pos.CENTER_RIGHT);
 		topBox.getChildren().add(rightTopBox);
-		topBox.setHgrow(rightTopBox, Priority.ALWAYS);
+		HBox.setHgrow(rightTopBox, Priority.ALWAYS);
 		
 		return topBox;
 	}
